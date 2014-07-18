@@ -248,6 +248,13 @@ def parseArgs():
 				idx += 1
 				rootDir = sys.argv[idx]
 				idx += 1
+			elif(arg == "-help"):
+				helpMessage()
+				idx += 1
+			elif(arg == "-verbose"):
+				global verbose
+				verbose = "true"
+				idx += 1
 			else:
 				print "One or more invalid flags. Use the -help flag for more information.\n"
 				idx += 1
@@ -263,14 +270,24 @@ def execute(idx, list):
 			tree.write(path)
 
 def prependXmlDeclaration():
+	string = '<?xml version="1.0" encoding="UTF-8"?>\n'
 	global path
 	f=open(path, 'r+')
-	lines = f.readlines()
-	f.seek(0)
-	string = '<?xml version="1.0" encoding="UTF-8"?>\n'
-	f.write(string)
-	f.writelines(lines)
-	f.close()
+	firstLine = f.readline()
+	if(not string in firstLine):
+		f.seek(0)
+		lines = f.readlines()
+		f.seek(0)
+		f.write(string)
+		f.writelines(lines)
+		f.close()
+
+def helpMessage():
+	print("\nHELP:\n"
+		+ "-d flag specifies directory(s) to consider\n-a flag adds file(s) to the XML\n"
+		+ "-r removes file(s) from the XML\n-root specifies a root location for the package.xml file\n"
+		+ "-verbose flag includes extra information\n"
+		+ "Keep in mind that the package.xml file and the directory(s) must be in the same location.\n")
 #***************************************MAIN PROGRAM***************************************
 rootDir = ""
 #-d
@@ -279,20 +296,21 @@ checkDirs = [] #list of directories to be compared with XML
 add = [] #list of files to add
 remove = [] #list of files to remove
 dryRun = "false" #dryRun mode does not modify XML file
+verbose = "false"
 
 parseArgs()
 
 if rootDir != "":
 	rootDir = rootDir + '/'
-	print rootDir
 path = rootDir + "package.xml"
 tree = ET.parse(path)
 root = tree.getroot()
 
-print "dry run:", dryRun
-print "checkDirs:", checkDirs
-print "add:", add
-print "remove:", remove
+if(verbose == "true"):
+	print "dry run:", dryRun
+	print "checkDirs:", checkDirs
+	print "add:", add
+	print "remove:", remove
 
 if(len(checkDirs)):
 	print "Executing directories..."
@@ -324,5 +342,4 @@ if(len(remove)):
 		else:
 			removeElement(f)
 
-if(len(checkDirs) or len(add) or len(remove)):
-	prependXmlDeclaration()
+prependXmlDeclaration()
