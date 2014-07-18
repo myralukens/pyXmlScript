@@ -133,7 +133,39 @@ def addElement(f):
 			if(dryRun == "false"):
 				tree.write("package.xml")
 
-def addElementObject(f):
+def removeElement(f):
+	fileName, fileExtension = os.path.splitext(f)
+	directory = rev_extensions[fileExtension]
+	idx = directories[directory]
+	removed = "false"
+	for node in root[idx]:
+		#Remove from XML
+		if removed == "false":
+			if node.text == fileName:
+				print("removing element " + node.text)
+				root[idx].remove(node)
+				removed = "true"
+				if(dryRun == "false"):
+					tree.write("package.xml")
+
+def deleteObj(idx, list):
+	for item in list:
+		for node in root[idx]:
+			if node.text == item:
+				#Remove from XML
+				print("removing element " + node.text)
+				root[idx].remove(node)
+
+
+def helperAddRemoveElementObject(idx, list, option):
+	if(option == "remove"):
+		deleteObj(idx, list)
+	else:
+		iterateList(idx, list)
+	if(dryRun == "false"):
+		tree.write("package.xml")
+
+def addRemoveElementObject(f, option):
 	list = []
 
 	fields = []
@@ -155,57 +187,29 @@ def addElementObject(f):
 	for elem in r.findall("./"):
 		for fn in elem.findall("./"):
 			if "fullName" in fn.tag:
-				#print elem.tag
 				(name, ext) = os.path.splitext(f)
 				item = name + '.' + fn.text
 				#print "name: ", name, "fn.text: ", fn.text
 				if "fields" in elem.tag:
+					print "adding", item, "to fields"
 					fields.append(item)
 				elif "webLinks" in elem.tag:
 					webLinks.append(item)							
-				elif "recordTypes" in elem.tag:							
+				elif "recordTypes" in elem.tag:		
 					recordTypes.append(item)							
 				elif "validationRules" in elem.tag:
 					validationRules.append(item)
 	print "***********************EXECUTING FIELDS***********************"
-	iterateList(fidx, fields)
-	if(dryRun == "false"):
-		tree.write("package.xml")
+	helperAddRemoveElementObject(fidx, fields, option)
 	print "***********************EXECUTING WEBLINKS***********************"
-	iterateList(widx, webLinks)
-	if(dryRun == "false"):
-		tree.write("package.xml")
+	helperAddRemoveElementObject(widx, webLinks, option)
 	print "***********************EXECUTING RECORDTYPES***********************"
-	iterateList(rtidx, recordTypes)
-	if(dryRun == "false"):
-		tree.write("package.xml")
+	helperAddRemoveElementObject(rtidx, recordTypes, option)
 	print "***********************EXECUTING VALIDATIONRULES***********************"
-	iterateList(vidx, validationRules)
-	if(dryRun == "false"):
-		tree.write("package.xml")
+	helperAddRemoveElementObject(vidx, validationRules, option)
 	print "***********************EXECUTING CUSTOMOBJECT***********************"		
 	idx = directories[directory]
-	iterateList(idx, list)
-	if(dryRun == "false"):
-		tree.write("package.xml")
-
-def removeElement(f):
-	fileName, fileExtension = os.path.splitext(f)
-	directory = rev_extensions[fileExtension]
-	idx = directories[directory]
-	removed = "false"
-	for node in root[idx]:
-		#Remove from XML
-		if removed == "false":
-			if node.text == fileName:
-				print("removing element " + node.text)
-				root[idx].remove(node)
-				removed = "true"
-				if(dryRun == "false"):
-					tree.write("package.xml")
-
-#def removeElementObject():
-
+	helperAddRemoveElementObject(idx, list, option)
 
 def getArgs(idx, list):
 	while(idx + 1 < len(sys.argv)):
@@ -282,11 +286,14 @@ if(len(add)):
 	print "\nExecuting adds..."
 	for f in add:
 		if ".object" in f:
-			addElementObject(f)
+			addRemoveElementObject(f, "add")
 		else:
 			addElement(f)
 
 if(len(remove)):
 	print "\nExecuting removes..."
 	for f in remove:
-		removeElement(f)
+		if ".object" in f:
+			addRemoveElementObject(f, "remove")
+		else:
+			removeElement(f)
