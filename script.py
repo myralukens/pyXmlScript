@@ -30,7 +30,8 @@ def iterateXML(idx, list):
 	for node in root[idx]:
 		if node.text not in list and not "name" in node.tag:
 			#Remove from XML
-			print("removing element " + node.text)
+			if verbose == "true":
+				print("removing element " + node.text)
 			root[idx].remove(node)
 
 #Iterates through list, adding elements into XML as needed
@@ -41,7 +42,8 @@ def iterateList(idx, list):
 			if xmlElem.text == elem:
 				exist = "true"
 		if exist == "false":
-			print("adding new element " + elem)
+			if verbose == "true":
+				print("adding new element " + elem)
 			newMember = ET.Element("members")
 			newMember.text = elem
 			#Add to XML
@@ -101,15 +103,20 @@ def handleObjects(dir):
 							recordTypes.append(item)							
 						elif "validationRules" in elem.tag:
 							validationRules.append(item)
-	print "***********************EXECUTING FIELDS***********************"
+	if verbose == "true":
+		print "***********************EXECUTING FIELDS***********************"
 	execute(fidx, fields)
-	print "***********************EXECUTING WEBLINKS***********************"
+	if verbose == "true":
+		print "***********************EXECUTING WEBLINKS***********************"
 	execute(widx, webLinks)
-	print "***********************EXECUTING RECORDTYPES***********************"
+	if verbose == "true":
+		print "***********************EXECUTING RECORDTYPES***********************"
 	execute(rtidx, recordTypes)
-	print "***********************EXECUTING VALIDATIONRULES***********************"
+	if verbose == "true":
+		print "***********************EXECUTING VALIDATIONRULES***********************"
 	execute(vidx, validationRules)
-	print "***********************EXECUTING CUSTOMOBJECT***********************"
+	if verbose == "true":
+		print "***********************EXECUTING CUSTOMOBJECT***********************"
 	return list
 
 
@@ -125,10 +132,12 @@ def addElement(f):
 		for node in root[idx]:
 			if contains == "false":
 				if fileName == node.text:
-					print "XML already contains element", fileName
+					if verbose == "true":
+						print "XML already contains element", fileName
 					contains = "true"
 		if contains == "false":
-			print("adding new element " + newMember.text)
+			if verbose == "true":
+				print("adding new element " + newMember.text)
 			root[idx].insert(0, newMember)
 			if(dryRun == "false"):
 				global path
@@ -143,7 +152,8 @@ def removeElement(f):
 		#Remove from XML
 		if removed == "false":
 			if node.text == fileName:
-				print("removing element " + node.text)
+				if verbose == "true":
+					print("removing element " + node.text)
 				root[idx].remove(node)
 				removed = "true"
 				if(dryRun == "false"):
@@ -203,15 +213,20 @@ def addRemoveElementObject(f, option):
 					recordTypes.append(item)							
 				elif "validationRules" in elem.tag:
 					validationRules.append(item)
-	print "***********************EXECUTING FIELDS***********************"
+	if verbose == "true":
+		print "***********************EXECUTING FIELDS***********************"
 	helperAddRemoveElementObject(fidx, fields, option)
-	print "***********************EXECUTING WEBLINKS***********************"
+	if verbose == "true":
+		print "***********************EXECUTING WEBLINKS***********************"
 	helperAddRemoveElementObject(widx, webLinks, option)
-	print "***********************EXECUTING RECORDTYPES***********************"
+	if verbose == "true":
+		print "***********************EXECUTING RECORDTYPES***********************"
 	helperAddRemoveElementObject(rtidx, recordTypes, option)
-	print "***********************EXECUTING VALIDATIONRULES***********************"
+	if verbose == "true":
+		print "***********************EXECUTING VALIDATIONRULES***********************"
 	helperAddRemoveElementObject(vidx, validationRules, option)
-	print "***********************EXECUTING CUSTOMOBJECT***********************"		
+	if verbose == "true":
+		print "***********************EXECUTING CUSTOMOBJECT***********************"		
 	idx = directories[directory]
 	helperAddRemoveElementObject(idx, list, option)
 
@@ -313,10 +328,12 @@ if(verbose == "true"):
 	print "remove:", remove
 
 if(len(checkDirs)):
-	print "Executing directories..."
+	if verbose == "true":
+		print "Executing directories..."
 	for directory in checkDirs:
 		longDir = rootDir + directory
-		print "[" + directory + "]"
+		if verbose == "true":
+			print "[" + directory + "]"
 		if directory == "objects":
 			list = handleObjects(longDir)
 		elif directory == "email":
@@ -327,7 +344,8 @@ if(len(checkDirs)):
 		execute(idx, list)
 
 if(len(add)):
-	print "\nExecuting adds..."
+	if verbose == "true":
+		print "\nExecuting adds..."
 	for f in add:
 		if ".object" in f:
 			addRemoveElementObject(f, "add")
@@ -335,7 +353,8 @@ if(len(add)):
 			addElement(f)
 
 if(len(remove)):
-	print "\nExecuting removes..."
+	if verbose == "true":
+		print "\nExecuting removes..."
 	for f in remove:
 		if ".object" in f:
 			addRemoveElementObject(f, "remove")
