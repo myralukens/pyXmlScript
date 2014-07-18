@@ -131,7 +131,8 @@ def addElement(f):
 			print("adding new element " + newMember.text)
 			root[idx].insert(0, newMember)
 			if(dryRun == "false"):
-				tree.write("package.xml")
+				global path
+				tree.write(path)
 
 def removeElement(f):
 	fileName, fileExtension = os.path.splitext(f)
@@ -146,7 +147,8 @@ def removeElement(f):
 				root[idx].remove(node)
 				removed = "true"
 				if(dryRun == "false"):
-					tree.write("package.xml")
+					global path
+					tree.write(path)
 
 def deleteObj(idx, list):
 	for item in list:
@@ -163,7 +165,8 @@ def helperAddRemoveElementObject(idx, list, option):
 	else:
 		iterateList(idx, list)
 	if(dryRun == "false"):
-		tree.write("package.xml")
+		global path
+		tree.write(path)
 
 def addRemoveElementObject(f, option):
 	list = []
@@ -181,7 +184,8 @@ def addRemoveElementObject(f, option):
 	fileName, fileExtension = os.path.splitext(f)
 	list.append(fileName)
 	directory = rev_extensions[fileExtension]
-	path = directory + '/' + f
+	global rootDir
+	path = rootDir + directory + '/' + f
 	t = ET.parse(path)
 	r = t.getroot()
 	for elem in r.findall("./"):
@@ -239,7 +243,13 @@ def parseArgs():
 				global dryRun
 				dryRun = "true"
 				idx += 1
+			elif(arg == "-root"):
+				global rootDir
+				idx += 1
+				rootDir = sys.argv[idx]
+				idx += 1
 			else:
+				print "One or more invalid flags. Use the -help flag for more information.\n"
 				idx += 1
 
 def execute(idx, list):
@@ -249,11 +259,20 @@ def execute(idx, list):
 		iterateXML(idx, list)
 		iterateList(idx, list)
 		if(dryRun == "false"):
-			tree.write("package.xml")
-#***************************************MAIN PROGRAM***************************************
-tree = ET.parse('package.xml')
-root = tree.getroot()
+			global path
+			tree.write(path)
 
+def prependXmlDeclaration():
+	global path
+	f=open(path, 'r+')
+	lines = f.readlines()
+	f.seek(0)
+	string = '<?xml version="1.0" encoding="UTF-8"?>\n'
+	f.write(string)
+	f.writelines(lines)
+	f.close()
+#***************************************MAIN PROGRAM***************************************
+rootDir = ""
 #-d
 checkDirs = [] #list of directories to be compared with XML
 #-a, -r, -dry
@@ -263,6 +282,13 @@ dryRun = "false" #dryRun mode does not modify XML file
 
 parseArgs()
 
+if rootDir != "":
+	rootDir = rootDir + '/'
+	print rootDir
+path = rootDir + "package.xml"
+tree = ET.parse(path)
+root = tree.getroot()
+
 print "dry run:", dryRun
 print "checkDirs:", checkDirs
 print "add:", add
@@ -271,15 +297,15 @@ print "remove:", remove
 if(len(checkDirs)):
 	print "Executing directories..."
 	for directory in checkDirs:
+		longDir = rootDir + directory
 		print "[" + directory + "]"
 		if directory == "objects":
-			list = handleObjects(directory)
+			list = handleObjects(longDir)
 		elif directory == "email":
-			list = handleEmail(directory)
+			list = handleEmail(longDir)
 		else:
-			list = listFiles(directory, extensions[directory])
+			list = listFiles(longDir, extensions[directory])
 		idx = directories[directory]
-		#Checks to see if the type has *
 		execute(idx, list)
 
 if(len(add)):
@@ -297,3 +323,6 @@ if(len(remove)):
 			addRemoveElementObject(f, "remove")
 		else:
 			removeElement(f)
+
+if(len(checkDirs) or len(add) or len(remove)):
+	prependXmlDeclaration()
