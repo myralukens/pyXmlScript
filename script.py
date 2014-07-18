@@ -283,10 +283,10 @@ def prependXmlDeclaration():
 		f.close()
 
 def helpMessage():
-	print("\nHELP:\n"
-		+ "-d flag specifies directory(s) to consider\n-a flag adds file(s) to the XML\n"
+	print("\nFLAGS:\n"
+		+ "-d specifies directory(s) to consider\n-a adds file(s) to the XML\n"
 		+ "-r removes file(s) from the XML\n-root specifies a root location for the package.xml file\n"
-		+ "-verbose flag includes extra information\n"
+		+ "-verbose includes extra information\n-dry declares it a dry run, where the XML file will not be modified\n"
 		+ "Keep in mind that the package.xml file and the directory(s) must be in the same location.\n")
 #***************************************MAIN PROGRAM***************************************
 rootDir = ""
