@@ -4,11 +4,10 @@ import xml.etree.ElementTree as ET
 
 ET.register_namespace("","http://soap.sforce.com/2006/04/metadata")
 
-#CustomLabel???
-directories = {'classes': 0, 'pages': 1, 'triggers': 2, 'objects': 5, 'email': 6, 'layouts': 8, 'profiles': 9,
+directories = {'classes': 0, 'pages': 1, 'triggers': 2, 'labels': 4, 'objects': 5, 'email': 6, 'layouts': 8, 'profiles': 9,
  'staticresources': 12, 'permissionsets': 13, 'translations': 14, 'tabs': 15, 'components': 16}
 
-extensions = {'classes': '.cls', 'pages': '.page', 'triggers': '.trigger', 'objects': '.object', 'email': '.email', 'layouts': '.layout',
+extensions = {'classes': '.cls', 'pages': '.page', 'triggers': '.trigger', 'labels': '.labels', 'objects': '.object', 'email': '.email', 'layouts': '.layout',
  'profiles': '.profile', 'staticresources': '.resource', 'permissionsets': '.permissionset', 'translations': '.translation',
  'tabs': '.tab', 'components': '.component'}
 
@@ -119,6 +118,21 @@ def handleObjects(dir):
 		print "***********************EXECUTING CUSTOMOBJECT***********************"
 	return list
 
+def handleCustomLabels(dir):
+	list = []
+
+	for f in os.listdir(dir):
+		if not f[:1] == '.':
+			(name, ext) = os.path.splitext(f)
+			path = dir + '/' + f
+			t = ET.parse(path)
+			r = t.getroot()
+			print "path", path
+			for elem in r.findall("./"):
+				for fn in elem.findall("./"):
+					if "fullName" in fn.tag:
+						list.append(fn.text)
+	return list
 
 def addElement(f):
 	fileName, fileExtension = os.path.splitext(f)
@@ -338,6 +352,8 @@ if(len(checkDirs)):
 			list = handleObjects(longDir)
 		elif directory == "email":
 			list = handleEmail(longDir)
+		elif directory == "labels":
+			list = handleCustomLabels(longDir)
 		else:
 			list = listFiles(longDir, extensions[directory])
 		idx = directories[directory]
